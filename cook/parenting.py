@@ -31,8 +31,6 @@ def _parent_of(word):
         parent = results[0][0].encode('utf-8')
     if parent not in parent_index:
         #print("{} append word: {}".format(parent_index_num, parent))
-        if parent == '':
-            print(word)
         __append_to_parent_index(parent)
     # return the index of the word in parent_index
     return str(parent_index[parent])
@@ -50,9 +48,8 @@ def _split_compound(comp):
         # filter parts in results
         for part in results:
             part = part.strip()
-            part = re.sub("\(.*\)", '', part).strip()
-            part = re.sub("\[.*\]", '', part).strip()
-            part = re.sub("-", '', part).strip()
+            if len(part) and part[0] == '[':
+                continue
             if len(part) > 1:
                 split.append(part)
         # end of filter parts
@@ -93,15 +90,15 @@ def convert(line):
     return words
 
 if __name__ == "__main__":
-    #infile = open("../tmp/sample.in.txt")
-    infile = open("../tmp/pali_text.txt")
-    parent_dict = sqlite3.connect("../material/dict_parent.db")
+    #infile = open("tmp/sample.in.txt")
+    infile = open("tmp/pali_text.txt")
+    parent_dict = sqlite3.connect("material/dict_parent.db")
     parent_cursor = parent_dict.cursor()
-    comp_dict = sqlite3.connect("../material/dict_compound.db")
+    comp_dict = sqlite3.connect("material/dict_compound.db")
     comp_cursor = comp_dict.cursor()
 
-    #output = open("../tmp/sample.out.txt", "w")
-    output = open("../tmp/pali_text_index.txt", "w")
+    #output = open("tmp/sample.out.txt", "w")
+    output = open("tmp/pali_text_index.txt", "w")
 
     for line in infile:
         line = line.strip('\n')
@@ -113,12 +110,11 @@ if __name__ == "__main__":
     infile.close()
     output.close()
 
-    #output = open("../tmp/sample.index.txt", "w")
-    output = open("../tmp/pali_index.txt", "w")
+    #output = open("tmp/sample.index.txt", "w")
+    output = open("tmp/pali_index.txt", "w")
     for word in parent_index:
         output.write(word + ' ')
         output.write(str(parent_index[word]) + '\n')
     output.close()
 
     print("final index number: {}".format(parent_index_num))
-

@@ -40,13 +40,13 @@ def filter_from(db):
         if len_parent > (len(row[0]) + 2):
             continue
         if word not in parent_of_word:
-            parent_of_word[word]     = [parent, len_parent]
+            parent_of_word[word] = [parent, len_parent]
         elif len_parent > parent_of_word[word][1]:
-            parent_of_word[word]     = [parent, len_parent]
+            parent_of_word[word] = [parent, len_parent]
 
 def insert_into(db):
     db_c = db.cursor()
-    insert_word="INSERT INTO dict VALUES (\"{}\", \"{}\");"
+    insert_word = "INSERT INTO dict VALUES (\"{}\", \"{}\");"
     for word in parent_of_word:
         db.execute(insert_word.format(word, parent_of_word[word][0]))
     db.commit()

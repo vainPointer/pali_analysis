@@ -28,17 +28,18 @@ def filter_from(db):
     for row in results:
         word  = row[0].encode('utf-8')
         parts = row[1].encode('utf-8')
-        if '-' in parts:
+        if '+' not in parts:
             continue
         parts = re.sub("\(.*\)", '', parts).strip()
-        parts = re.sub("¿", '', parts).strip()
+        parts = re.sub("[¿'=\$\-]", '', parts).strip()
         if parts:
+            parts = parts.lower()
             if word not in parts_of_word:
                 parts_of_word[word] = parts
 
 def insert_into(db):
     db_c = db.cursor()
-    insert_word="INSERT INTO dict VALUES (\"{}\", \"{}\");"
+    insert_word = "INSERT INTO dict VALUES (\"{}\", \"{}\");"
     for word in parts_of_word:
         db.execute(insert_word.format(word, parts_of_word[word]))
     db.commit()
