@@ -89,7 +89,7 @@ def convert(line):
     words = ' '.join(words)
 
     if words:
-        words = [struct.pack("H", int(word)) for word in words.split(' ')]
+        words = [struct.pack("I", int(word)) for word in words.split(' ')]
     return words
 
 if __name__ == "__main__":
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         line = convert(line)
         for word in line:
             output.write(word)
-        output.write('\r\n')
+        output.write('\n')
         
     infile.close()
     output.close()
