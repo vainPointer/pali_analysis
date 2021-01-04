@@ -1,0 +1,16 @@
+**/*.o
+**/.vscode/
+**/build/
+**/tmp/
+
+# materials from other places
+material/pm.db
+material/comp.db
+material/sys_regular.db
+material/sys_irregular.db
+
+material/dict_compound.db
+material/dict_parent.db
+
+# misc
+**/.DS_Store
