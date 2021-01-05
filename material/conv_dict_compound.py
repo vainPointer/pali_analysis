@@ -31,7 +31,9 @@ def filter_from(db):
         if '+' not in parts:
             continue
         parts = re.sub("\(.*\)", '', parts).strip()
-        parts = re.sub("[¿'=\$\-]", '', parts).strip()
+        parts = re.sub("\).*", '', parts).strip()
+        parts = re.sub("\(.*", '', parts).strip()
+        parts = re.sub("[¿'=\$\-12345]", '', parts).strip()
         if parts:
             parts = parts.lower()
             if word not in parts_of_word:

@@ -85,8 +85,6 @@ def convert(line):
     words = list(map(simplify, words))
     words = ' '.join(words)
 
-    if words:
-        words = [struct.pack("I", int(word)) for word in words.split(' ')]
     return words
 
 if __name__ == "__main__":
@@ -103,8 +101,7 @@ if __name__ == "__main__":
     for line in infile:
         line = line.strip('\n')
         line = convert(line)
-        for word in line:
-            output.write(word)
+        output.write(line)
         output.write('\n')
         
     infile.close()
