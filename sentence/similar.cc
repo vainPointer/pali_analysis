@@ -61,8 +61,8 @@ void *worker(void* args) {
 
     float percent = 0.01; 
     time_t start = time(NULL);
-    for (int j = mybeg; j < myend; j++) {
-        for (int i = 0; i < sharedmem.size(); i++) {
+    for (int j = 0; j < sharedmem.size(); j++) {
+        for (int i = mybeg; i < myend; i++) {
             jaccard_score = jaccard_similarity(sharedmem[i], sharedmem[j]);
             if (jaccard_score > 0.6) {
                 fprintf(output, "%d,%d,%f\n", i, j, jaccard_score);                
