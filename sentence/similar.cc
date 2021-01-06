@@ -59,16 +59,17 @@ void *worker(void* args) {
     printf("[+] I'm thread %d, will run tasks %d ~ %d\n", myid, mybeg, myend);
     float jaccard_score;
 
+    int   total   = sharedmem.size();
     float percent = 0.01; 
     time_t start = time(NULL);
-    for (int j = 0; j < sharedmem.size(); j++) {
+    for (int j = 0; j < total; j++) {
         for (int i = mybeg; i < myend; i++) {
             jaccard_score = jaccard_similarity(sharedmem[i], sharedmem[j]);
             if (jaccard_score > 0.6) {
                 fprintf(output, "%d,%d,%f\n", i, j, jaccard_score);                
             }
         }
-        if ( ((float) (j - mybeg)) / pertask * 100 > percent ) {
+        if ( (float) j / total * 100 > percent ) {
             time_t end = time(NULL);
             printf("[%d] fininsh %f%% in %f sec.\n", \
                     myid, percent, difftime(end, start));
