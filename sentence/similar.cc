@@ -1,7 +1,9 @@
 #include <iostream>
+#include <algorithm>
 #include <vector>
 #include <fstream>
 #include <string>
+#include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -12,8 +14,6 @@ int pertask = 0;
 int remaintask = 0;
 vector<vector<int> > sharedmem;
 FILE *output;
-//pthread_mutex_t iindex = PTHREAD_MUTEX_INITIALIZER;
-//pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
 
 vector<int> split(const string& s, const string& delim);
 void loaddata(char *datafile, vector<vector<int> > &mem);
@@ -31,11 +31,10 @@ int main() {
     printf("[+] Load %lu sentences in %f sec.\n", \
             sharedmem.size(), difftime(end, start));
 
-    int ncpu = getNcpu(); // 4
+    int ncpu = getNcpu();
     pertask = sharedmem.size() / ncpu;
     remaintask = sharedmem.size() % ncpu;
     printf("[+] Have %d processors, each will run %d tasks\n", ncpu, pertask);
-    fflush(stdout);
 
     int       *myid = new int[ncpu];
     pthread_t *tids = new pthread_t[ncpu];
@@ -62,14 +61,14 @@ void *worker(void* args) {
 
     float percent = 0.01; 
     time_t start = time(NULL);
-    for (int i = mybeg; i < myend; i++) {
-        for (int j = 0; j < sharedmem.size(); j++) {
+    for (int j = mybeg; j < myend; j++) {
+        for (int i = 0; i < sharedmem.size(); i++) {
             jaccard_score = jaccard_similarity(sharedmem[i], sharedmem[j]);
             if (jaccard_score > 0.6) {
                 fprintf(output, "%d,%d,%f\n", i, j, jaccard_score);                
             }
         }
-        if ( ((float) (i - mybeg)) / pertask * 100 > percent ) {
+        if ( ((float) (j - mybeg)) / pertask * 100 > percent ) {
             time_t end = time(NULL);
             printf("[%d] fininsh %f%% in %f sec.\n", \
                     myid, percent, difftime(end, start));
@@ -105,7 +104,7 @@ void loaddata(char *datafile, vector<vector<int> > &mem) {
     }
 }
 
-float jaccard_similarity(vector<int> a, vector<int> b) {
+inline float jaccard_similarity(vector<int> a, vector<int> b) {
     float longvshort;
     longvshort = ((float) a.size()) / ((float) (a.size()+b.size()));
     if (longvshort < 0.35 || longvshort > 0.65) {
