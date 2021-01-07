@@ -10,6 +10,9 @@
 
 using namespace std;
 
+#define LSTHRD 0.35 // threshold for longvshort
+#define JATHRD 0.69 // threshold for jaccard_similarity
+
 int pertask = 0;
 int remaintask = 0;
 vector<vector<int> > sharedmem;
@@ -17,16 +20,16 @@ FILE *output;
 
 vector<int> split(const string& s, const string& delim);
 void loaddata(char *datafile, vector<vector<int> > &mem);
-float jaccard_similarity(vector<int> a, vector<int> b);
+inline float jaccard_similarity(vector<int> a, vector<int> b);
 
 int getNcpu();
 void *worker(void* args);
 
 int main() {
     time_t start = time(NULL);
+    output = fopen("../tmp/pali_sentence_similar.txt", "w");
     char filename[] = "../tmp/pali_text_index.txt";
     loaddata(filename, sharedmem);
-    output = fopen("../tmp/pali_sentence_similar.txt", "w");
     time_t end = time(NULL);
     printf("[+] Load %lu sentences in %f sec.\n", \
             sharedmem.size(), difftime(end, start));
@@ -65,8 +68,8 @@ void *worker(void* args) {
     for (int j = 0; j < total; j++) {
         for (int i = mybeg; i < myend; i++) {
             jaccard_score = jaccard_similarity(sharedmem[i], sharedmem[j]);
-            if (jaccard_score > 0.6) {
-                fprintf(output, "%d,%d,%f\n", i, j, jaccard_score);                
+            if (jaccard_score > JATHRD) {
+                fprintf(output, "%d,%d,%f\n", i+1, j+1, jaccard_score);                
             }
         }
         if ( (float) j / total * 100 > percent ) {
@@ -90,6 +93,8 @@ vector<int> split(const string& s, const string& delim = " ") {
         lastPos = s.find_first_not_of(delim, pos);
         pos = s.find_first_of(delim, lastPos);
     }
+    // The following is not the main functional of split
+    sort(tokens.begin(), tokens.end());
     return tokens;
 }
 
@@ -106,19 +111,22 @@ void loaddata(char *datafile, vector<vector<int> > &mem) {
 }
 
 inline float jaccard_similarity(vector<int> a, vector<int> b) {
-    float longvshort;
-    longvshort = ((float) a.size()) / ((float) (a.size()+b.size()));
-    if (longvshort < 0.35 || longvshort > 0.65) {
+    int len_a = a.size();
+    int len_b = b.size();
+    float longvshort = ((float) len_a ) / (len_a + len_b);
+    if (longvshort < LSTHRD || longvshort > 1-LSTHRD) {
         return 0;
     }
 
+    int i = 0, j = 0;
     float jaccard;
-    vector<int> inter;
-    set_intersection(a.begin(), a.end(), b.begin(), b.end(), 
-        inserter(inter, inter.begin()));
-    jaccard = (float) inter.size();
+    while ( (i < len_a) && (j < len_b) ) {
+        if      ( a[i] < b[j] ) i++;
+        else if ( b[j] < a[i] ) j++;
+        else { jaccard += 1; i++; j++; }
+    }
     if (jaccard) {
-        return jaccard / (a.size()+b.size()-jaccard);
+        return jaccard / (len_a + len_b - jaccard);
     } else {
         return 0;
     }
@@ -133,3 +141,4 @@ int getNcpu(){
     return sysconf(_SC_NPROCESSORS_ONLN);
 #endif
 }
+

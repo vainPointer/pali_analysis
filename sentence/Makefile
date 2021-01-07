@@ -2,7 +2,7 @@ CC=g++
 NAME=similar
 SRCS=$(foreach name, $(NAME), $(name).cc)
 OBJS=$(foreach name, $(NAME), $(name).o)
-CFLAGS=-O2
+CFLAGS=-Ofast
 LFLAGS=-lpthread
 
 all:pali-sentence-similar
