@@ -19,17 +19,21 @@ vector<vector<int> > sharedmem;
 FILE *output;
 
 vector<int> split(const string& s, const string& delim);
-void loaddata(char *datafile, vector<vector<int> > &mem);
+void loaddata(const char *datafile, vector<vector<int> > &mem);
 inline float jaccard_similarity(vector<int> a, vector<int> b);
 
 int getNcpu();
 void *worker(void* args);
 
-int main() {
+int main(int argc, const char *argv[]) {
     time_t start = time(NULL);
-    output = fopen("../tmp/pali_sentence_similar.txt", "w");
-    char filename[] = "../tmp/pali_text_index.txt";
-    loaddata(filename, sharedmem);
+    if (argc < 3) {
+        printf("usage: %s input_filename output_filename", argv[0]);
+        exit(0);
+    } else {
+        loaddata(argv[1], sharedmem);
+        output = fopen(argv[2], "w");
+    }
     time_t end = time(NULL);
     printf("[+] Load %lu sentences in %f sec.\n", \
             sharedmem.size(), difftime(end, start));
@@ -98,7 +102,7 @@ vector<int> split(const string& s, const string& delim = " ") {
     return tokens;
 }
 
-void loaddata(char *datafile, vector<vector<int> > &mem) {
+void loaddata(const char *datafile, vector<vector<int> > &mem) {
     ifstream file; char buf[1024 * 8];
     file.rdbuf()->pubsetbuf(buf, sizeof buf);
     file.open(datafile);
@@ -119,7 +123,7 @@ inline float jaccard_similarity(vector<int> a, vector<int> b) {
     }
 
     int i = 0, j = 0;
-    float jaccard;
+    float jaccard = 0;
     while ( (i < len_a) && (j < len_b) ) {
         if      ( a[i] < b[j] ) i++;
         else if ( b[j] < a[i] ) j++;
