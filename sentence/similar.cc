@@ -11,7 +11,7 @@
 using namespace std;
 
 #define LSTHRD 0.35 // threshold for longvshort
-#define JATHRD 0.69 // threshold for jaccard_similarity
+#define JATHRD 0.59 // threshold for jaccard_similarity
 
 int pertask = 0;
 int remaintask = 0;
@@ -117,6 +117,9 @@ void loaddata(const char *datafile, vector<vector<int> > &mem) {
 inline float jaccard_similarity(vector<int> a, vector<int> b) {
     int len_a = a.size();
     int len_b = b.size();
+    if (len_a + len_b < 6) {
+        return 0;
+    }
     float longvshort = ((float) len_a ) / (len_a + len_b);
     if (longvshort < LSTHRD || longvshort > 1-LSTHRD) {
         return 0;
